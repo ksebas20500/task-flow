@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.models.tarea_modelo import TareaModelo
+from app.config.bd import obtener_conexion
 
 tareas_bp = Blueprint("tareas", __name__)
 
@@ -7,7 +8,7 @@ tareas_bp = Blueprint("tareas", __name__)
 # ✅ Obtener tareas (hice que el usuario_id sea opcional o use GET simple)
 @tareas_bp.route("/tareas/<int:usuario_id>", methods=["GET"])
 def obtener_tareas(usuario_id):
-    # Esto funcionará al entrar desde el navegador a /api/tareas/1
+
     tareas = TareaModelo.obtener_tareas_por_usuario(usuario_id)
     return jsonify(tareas)
 
@@ -15,7 +16,7 @@ def obtener_tareas(usuario_id):
 @tareas_bp.route("/tareas", methods=["POST"])
 def crear_tarea():
     datos = request.json
-    # Tip: Usa .get() para evitar errores si falta un campo
+
     tarea_id = TareaModelo.crear_tarea(
         datos.get("usuario_id"),
         datos.get("titulo"),
@@ -26,19 +27,37 @@ def crear_tarea():
 
 
 # ✅ Actualizar tarea
-@tareas_bp.route("/tareas/<int:tarea_id>", methods=["PUT"])
-def actualizar_tarea(tarea_id):
-    datos = request.json
+@tareas_bp.route('/tareas/<int:id>', methods=['PUT'])
+def actualizar_tarea(id):
+    conn = None
+    try:
+        data = request.get_json()
+        nuevo_estado = data.get('estado')
 
-    TareaModelo.actualizar_tarea(
-        tarea_id,
-        datos["titulo"],
-        datos.get("descripcion"),
-        datos.get("fecha_limite"),
-        datos.get("estado", "pending")
-    )
+        # 1. Abrimos la conexión usando tu función
+        conn = obtener_conexion()
+        cur = conn.cursor()
 
-    return jsonify({"mensaje": "Tarea actualizada"})
+        # 2. Ejecutamos el UPDATE
+        cur.execute(
+            "UPDATE tareas SET estado = %s WHERE id = %s",
+            (nuevo_estado, id)
+        )
+
+        # 3. Guardamos los cambios
+        conn.commit()
+        cur.close()
+
+        return jsonify({"mensaje": "Tarea actualizada correctamente"}), 200
+
+    except Exception as e:
+        print(f"❌ Error en el servidor: {e}")
+        return jsonify({"error": str(e)}), 500
+    
+    finally:
+        # 4. Importante: Cerramos la conexión siempre
+        if conn:
+            conn.close()
 
 
 # ✅ Eliminar tarea

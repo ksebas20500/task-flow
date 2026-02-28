@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>TaskFlow - Iniciar Sesión</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<div class="auth-container">
+        <h1 class="logo">TaskFlow</h1>
+        <h2>Iniciar Sesión</h2>
+        <form class="auth-form" id="login-form">
+            <input type="email" id="email" placeholder="Correo electrónico" required>
+            <input type="password" id="password" placeholder="Contraseña" required>
+            <button type="submit" class="btn-auth">Entrar</button>
+        </form>
+        <p class="auth-link">¿No tienes cuenta? <a href="registro.html">Regístrate aquí</a></p>
+    </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const res = await fetch ('http://127.0.0.1:3000/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                // GUARDAMOS EL ID EN EL NAVEGADOR
+                localStorage.setItem('usuario_id', data.usuario_id);
+                localStorage.setItem('nombre_usuario', data.nombre);
+                alert('¡Bienvenido ' + data.nombre + '!');
+                window.location.href = 'index.html'; // Nos lleva a las tareas
+            } else {
+                alert(data.error);
+            }
+        });
+    </script>
+</body>
+</html>

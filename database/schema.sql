@@ -1,29 +1,20 @@
--- =========================================
--- CREAR TABLA DE USUARIOS
--- =========================================
-CREATE TABLE IF NOT EXISTS users (
+-- 1. Tabla de Usuarios
+CREATE TABLE IF NOT EXISTS usuarios (
     id SERIAL PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    email VARCHAR(100) NOT NULL UNIQUE,
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- =========================================
--- CREAR TABLA DE TAREAS
--- =========================================
-CREATE TABLE IF NOT EXISTS tasks (
+-- 2. Tabla de Tareas (con relación al usuario)
+CREATE TABLE IF NOT EXISTS tareas (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    title VARCHAR(150) NOT NULL,
-    description TEXT,
-    due_date DATE,
-    status VARCHAR(20) DEFAULT 'pending',
+    usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+    titulo VARCHAR(200) NOT NULL,
+    descripcion TEXT,
+    estado VARCHAR(20) DEFAULT 'pendiente',
+    fecha_limite TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_user
-        FOREIGN KEY(user_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

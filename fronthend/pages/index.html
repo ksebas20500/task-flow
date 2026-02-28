@@ -2,20 +2,33 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaskFlow - Mis Tareas</title>
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
+    <header class="user-header">
+        <h2 id="nombre-bienvenida">Cargando...</h2>
+        <button class="btn-logout" onclick="cerrarSesion()">Salir</button>
+    </header>
+
     <div class="container">
-        <h1>TaskFlow</h1>
+        <h1 class="logo">TaskFlow</h1>
         
-        <div class="add-task">
-            <input type="text" id="titulo-tarea" placeholder="¿Qué hay que hacer?">
-            <input type="date" id="fecha-tarea">
-            <button onclick="agregarTarea()">Añadir</button>
+        <div class="add-task-card">
+            <div class="input-group">
+                <input type="text" id="titulo-tarea" placeholder="Título de la tarea">
+                <textarea id="descripcion-tarea" placeholder="Descripción (opcional)"></textarea>
+            </div>
+            
+            <div class="action-group">
+                <input type="datetime-local" id="fecha-tarea">
+                <button class="btn-add" onclick="agregarTarea()">Añadir</button>
+            </div>
         </div>
 
-        <ul id="lista-tareas"></ul>
+        <ul id="lista-tareas">
+            </ul>
     </div>
 
     <script src="../js/app.js"></script>

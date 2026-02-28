@@ -1,50 +1,186 @@
-const API_URL = "http://127.0.0.1:5000/api/tareas";
-const USUARIO_ID = 1; // Por ahora usamos el 1 hasta terminar la Fase 5
 
-// 1. Cargar tareas al abrir la página
-async function cargarTareas() {
-    const res = await fetch(`${API_URL}/${USUARIO_ID}`);
-    const tareas = await res.json();
-    
-    const lista = document.getElementById("lista-tareas");
-    lista.innerHTML = ""; // Limpiar lista
+const API_URL = "http://127.0.0.1:3000/api/tareas";
 
-    tareas.forEach(tarea => {
-        const li = document.createElement("li");
-        li.className = tarea.estado === 'completada' ? 'completed' : '';
-        li.innerHTML = `
-            <span>${tarea.titulo} - <small>${tarea.fecha_limite || 'Sin fecha'}</small></span>
-            <button onclick="eliminarTarea(${tarea.id})">🗑️</button>
-        `;
-        lista.appendChild(li);
-    });
+// 1. SEGURIDAD Y DATOS DE SESIÓN
+const USUARIO_ID = localStorage.getItem('usuario_id');
+const NOMBRE_USUARIO = localStorage.getItem('nombre_usuario');
+
+// Si el usuario no ha iniciado sesión, lo devolvemos al login inmediatamente
+if (!USUARIO_ID) {
+    window.location.href = 'login.html';
 }
 
-// 2. Función para agregar tarea (Lo que hacías en Postman)
+// 2. BIENVENIDA PERSONALIZADA
+// Solo si tienes un elemento con id="nombre-bienvenida" en tu HTML
+if (NOMBRE_USUARIO && document.getElementById("nombre-bienvenida")) {
+    document.getElementById("nombre-bienvenida").innerText = `Hola, ${NOMBRE_USUARIO} 👋`;
+}
+
+// 3. CARGAR TAREAS (Actualizado con función de completar)
+async function cargarTareas() {
+    try {
+        const res = await fetch(`${API_URL}/${USUARIO_ID}`);
+        const tareas = await res.json();
+        
+        const lista = document.getElementById("lista-tareas");
+        lista.innerHTML = ""; 
+
+        tareas.forEach(tarea => {
+            const li = document.createElement("li");
+            // Aplicamos la clase si la tarea está completada
+            li.className = tarea.estado === 'completada' ? 'completed' : '';
+            
+            li.innerHTML = `
+                <div class="tarea-info" onclick="alternarEstado(${tarea.id}, '${tarea.estado}')" style="cursor: pointer;">
+                    <strong style="${tarea.estado === 'completada' ? 'text-decoration: line-through;' : ''}">
+                        ${tarea.titulo}
+                    </strong>
+                    <small>${tarea.fecha_limite || 'Sin fecha'}</small>
+                </div>
+                <div class="acciones">
+                    <button class="btn-delete" onclick="eliminarTarea(${tarea.id})">🗑️</button>
+                </div>
+            `;
+            lista.appendChild(li);
+        });
+    } catch (error) {
+        console.error("Error al cargar tareas:", error);
+    }
+}
+
+// 4. AGREGAR NUEVA TAREA
 async function agregarTarea() {
     const titulo = document.getElementById("titulo-tarea").value;
     const fecha = document.getElementById("fecha-tarea").value;
 
+    if (!titulo) return alert("El título es obligatorio");
+
     const nuevaTarea = {
-        usuario_id: USUARIO_ID,
+        usuario_id: parseInt(USUARIO_ID),
         titulo: titulo,
+        fecha_limite: fecha,
+        estado: 'pendiente' // Por defecto siempre nacen pendientes
+    };
+
+    try {
+        await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(nuevaTarea)
+        });
+
+        document.getElementById("titulo-tarea").value = ""; 
+        document.getElementById("fecha-tarea").value = ""; 
+        cargarTareas(); 
+    } catch (error) {
+        alert("No se pudo guardar la tarea.");
+    }
+}
+
+// 5. MARCAR COMO COMPLETADA / PENDIENTE (NUEVA FUNCIÓN)
+async function alternarEstado(id, estadoActual) {
+    const nuevoEstado = estadoActual === 'pendiente' ? 'completada' : 'pendiente';
+    
+    try {
+        await fetch(`${API_URL}/${id}`, {
+            method: "PUT", // Usamos PUT para actualizar
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ estado: nuevoEstado })
+        });
+        cargarTareas(); // Recargamos la lista para ver el cambio
+    } catch (error) {
+        console.error("Error al actualizar estado:", error);
+    }
+}
+
+// 6. ELIMINAR TAREA
+async function eliminarTarea(id) {
+    if (confirm("¿Eliminar esta tarea?")) {
+        try {
+            await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+            cargarTareas();
+        } catch (error) {
+            alert("No se pudo eliminar la tarea.");
+        }
+    }
+}
+
+// 7. Agregar nueva tarea (CON DESCRIPCIÓN)
+async function agregarTarea() {
+    const titulo = document.getElementById("titulo-tarea").value;
+    const descripcion = document.getElementById("descripcion-tarea").value; // Capturamos descripción
+    const fecha = document.getElementById("fecha-tarea").value;
+
+    if (!titulo) return alert("El título es obligatorio");
+
+    const nuevaTarea = {
+        usuario_id: parseInt(USUARIO_ID),
+        titulo: titulo,
+        descripcion: descripcion, // La mandamos al backend
         fecha_limite: fecha
     };
 
-    await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(nuevaTarea)
-    });
+    try {
+        await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(nuevaTarea)
+        });
 
-    document.getElementById("titulo-tarea").value = ""; // Limpiar input
-    cargarTareas(); // Refrescar lista
+        // Limpiamos los campos
+        document.getElementById("titulo-tarea").value = ""; 
+        document.getElementById("descripcion-tarea").value = ""; 
+        document.getElementById("fecha-tarea").value = ""; 
+        cargarTareas(); 
+    } catch (error) {
+        alert("No se pudo guardar la tarea.");
+    }
 }
 
-// 3. Función para eliminar
-async function eliminarTarea(id) {
-    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-    cargarTareas();
+// 8. Cargar tareas (MOSTRAR HORA Y DESCRIPCIÓN)
+async function cargarTareas() {
+    try {
+        const res = await fetch(`${API_URL}/${USUARIO_ID}`);
+        const tareas = await res.json();
+        const lista = document.getElementById("lista-tareas");
+        lista.innerHTML = ""; 
+
+        tareas.forEach(tarea => {
+            // Formateamos la fecha para que se vea bonita en español
+            const fechaFormateada = tarea.fecha_limite 
+                ? new Date(tarea.fecha_limite).toLocaleString('es-ES', { 
+                    day: '2-digit', month: '2-digit', year: 'numeric', 
+                    hour: '2-digit', minute: '2-digit' 
+                  })
+                : 'Sin fecha';
+
+            const li = document.createElement("li");
+            li.className = tarea.estado === 'completada' ? 'completed' : '';
+            li.innerHTML = `
+                <div class="tarea-info" onclick="alternarEstado(${tarea.id}, '${tarea.estado}')">
+                    <strong>${tarea.titulo}</strong>
+                    <p class="desc">${tarea.descripcion || 'Sin descripción'}</p>
+                    <small>📅 ${fechaFormateada}</small>
+                </div>
+                <button class="btn-delete" onclick="eliminarTarea(${tarea.id})">🗑️</button>
+            `;
+            lista.appendChild(li);
+        });
+    } catch (error) {
+        console.error("Error al cargar tareas:", error);
+    }
 }
 
-cargarTareas();
+
+
+
+// 9. CERRAR SESIÓN
+function cerrarSesion() {
+    if (confirm("¿Quieres cerrar sesión?")) {
+        localStorage.clear();
+        window.location.href = 'login.html';
+    }
+}
+
+// Arrancar la app al cargar
+document.addEventListener("DOMContentLoaded", cargarTareas);

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>TaskFlow - Registro</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<div class="auth-container">
+        <h1 class="logo">TaskFlow</h1>
+        <h2>Crea tu cuenta</h2>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">Organiza tus tareas de forma sencilla</p>
+        
+        <form class="auth-form" id="registro-form">
+            <input type="text" id="nombre" placeholder="Nombre completo" required>
+            <input type="email" id="email" placeholder="Correo electrónico" required>
+            <input type="password" id="password" placeholder="Contraseña segura" required>
+            
+            <button type="submit" class="btn-auth">Registrarme</button>
+        </form>
+
+        <p class="auth-link">
+            ¿Ya tienes una cuenta? <a href="login.html">Inicia sesión aquí</a>
+        </p>
+    </div>
+    <script>
+        document.getElementById('registro-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const nombre = document.getElementById('nombre').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    try {
+        const res = await fetch('http://127.0.0.1:3000/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nombre, email, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            alert('¡Cuenta creada con éxito! Ahora inicia sesión.');
+            window.location.href = 'login.html';
+        } else {
+            alert('Error: ' + (data.error || 'No se pudo registrar'));
+        }
+    } catch (error) {
+        console.error("Error de conexión:", error);
+        alert("No se pudo conectar con el servidor. Revisa si Flask está encendido.");
+    }
+});
+
+    </script>
+</body>
+</html>
