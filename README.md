@@ -1,58 +1,48 @@
-🚀 TaskFlow
+# TaskFlow - Gestor de Tareas Minimalista 📝⚡
 
+Repositorio académico correspondiente al desarrollo de TaskFlow, una aplicación web para la gestión de tareas por usuario mediante una arquitectura cliente–servidor con API REST en Flask.
 
+El sistema busca facilitar la organización personal mediante la creación, consulta, actualización y eliminación de tareas asociadas a cada usuario registrado.
 
+---
 
+# 📌 Descripción del Proyecto
 
+TaskFlow es un gestor de tareas minimalista inspirado en herramientas como Google Tasks y Microsoft To-Do. El sistema permite a los usuarios registrarse, iniciar sesión y administrar sus tareas personales.
 
+La aplicación implementa:
 
+-Arquitectura modular con Flask Blueprints
 
-TaskFlow es un gestor de tareas minimalista inspirado en la simplicidad de Google Tasks y la organización de Microsoft To-Do.
-El objetivo del proyecto es ofrecer una herramienta de productividad centrada en la gestión eficiente del tiempo mediante tareas asociadas a usuarios.
+-Comunicación cliente–servidor mediante Fetch API
 
-✨ Características
+-Persistencia de datos en base de datos relacional
 
-🔐 Registro y login de usuarios
+-Cifrado seguro de contraseñas
 
-📝 CRUD completo de tareas
+---
+# 📁 Estructura del Proyecto
+```plaintext
+TaskFlow/
+├── app/
+│   ├── config/
+│   │   └── bd.py
+│   │
+│   ├── models/
+│   │   └── tarea_modelo.py
+│   │
+│   └── routes/
+│       ├── tareas_routes.py
+│       └── autentificaion_routes.py
+│
+├── frontend/
+│   ├── css/
+│   ├── js/
+│   └── pages/
+│
+├── run.py
+├── requirements.txt (opcional)
+└── README.md
+```
+---
 
-👤 Tareas asociadas por usuario
-
-⚡ API REST con Flask
-
-🎨 Frontend ligero con HTML, CSS y JavaScript
-
-🔒 Contraseñas cifradas con hash seguro
-
-🧩 Arquitectura modular con Blueprints
-
-🌐 CORS configurado para desarrollo
-
-🧱 Tecnologías
-Backend
-
-Python
-
-Flask
-
-Flask-CORS
-
-PostgreSQL / MySQL
-
-Werkzeug Security
-
-Frontend
-
-HTML5
-
-CSS3
-
-JavaScript (Fetch API)
-
-Herramientas
-
-Git & GitHub
-
-pgAdmin
-
-Thunder Client / Postman
