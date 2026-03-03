@@ -7,20 +7,21 @@ class TareaModelo:
         conexion = obtener_conexion()
         cursor = conexion.cursor()
 
-        # Corregido: user_id -> usuario_id | due_date -> fecha_limite
+    # Eliminamos created_at y updated_at porque no están en tu tabla
         cursor.execute(
-            "SELECT id, usuario_id, titulo, descripcion, fecha_limite, estado, created_at, updated_at "
-            "FROM tareas WHERE usuario_id = %s ORDER BY fecha_limite",
-            (usuario_id,)
-        )
+        "SELECT id, usuario_id, titulo, descripcion, fecha_limite, estado "
+        "FROM tareas WHERE usuario_id = %s ORDER BY fecha_limite ASC",
+        (usuario_id,)
+    )
 
-        # Convertir a lista de diccionarios para que el JSON sea legible
+    # Esto convierte las filas en diccionarios automáticamente
         columnas = [desc[0] for desc in cursor.description]
         tareas = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
 
         cursor.close()
         conexion.close()
         return tareas
+
 
     @staticmethod
     def crear_tarea(usuario_id, titulo, descripcion, fecha_limite):
