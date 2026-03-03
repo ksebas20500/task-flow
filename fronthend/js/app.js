@@ -1,6 +1,5 @@
 
-const API_URL = "http://127.0.0.1:5000/api/tareas";
-
+const API_URL = "https://task-flow-lzav.onrender.com/api/tareas";
 // 1. SEGURIDAD Y DATOS DE SESIÓN
 const USUARIO_ID = localStorage.getItem('usuario_id');
 const NOMBRE_USUARIO = localStorage.getItem('nombre_usuario');
