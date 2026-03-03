@@ -4,6 +4,8 @@ from flask_cors import CORS
 from app.routes.tareas_routes import tareas_bp 
 from app.routes.autentificaion_routes import auth_bp 
 
+import os
+
 def create_app():
     app = Flask(__name__)
 
@@ -21,5 +23,7 @@ def create_app():
 app = create_app()
 
 if __name__ == '__main__':
-    print("🚀 Servidor TaskFlow escuchando en http://127.0.0.1:3000")
-    app.run(debug=True, port=3000)
+# Usamos el puerto que asigne el servidor o el 5000 por defecto
+    port = int(os.environ.get("PORT", 5000))
+    # debug=False es vital para cuando subas la página a la web
+    app.run(host="0.0.0.0", port=port, debug=False)

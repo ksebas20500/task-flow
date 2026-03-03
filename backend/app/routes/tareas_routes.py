@@ -15,15 +15,25 @@ def obtener_tareas(usuario_id):
 # ✅ Crear tarea (Mantenlo como POST, pero pruébalo con Postman, no con el navegador)
 @tareas_bp.route("/tareas", methods=["POST"])
 def crear_tarea():
-    datos = request.json
+    try:
+        datos = request.json
+        
+        # Validación extra de seguridad en el servidor
+        if not datos.get("titulo"):
+            return jsonify({"error": "Falta el título de la tarea"}), 400
 
-    tarea_id = TareaModelo.crear_tarea(
-        datos.get("usuario_id"),
-        datos.get("titulo"),
-        datos.get("descripcion"),
-        datos.get("fecha_limite")
-    )
-    return jsonify({"mensaje": "Tarea creada", "id": tarea_id}), 201
+        tarea_id = TareaModelo.crear_tarea(
+            datos.get("usuario_id"),
+            datos.get("titulo"),
+            datos.get("descripcion"),
+            datos.get("fecha_limite")
+        )
+        
+        return jsonify({"mensaje": "Tarea creada", "id": tarea_id}), 201
+        
+    except Exception as e:
+        print(f"Error interno: {e}") # Para que tú lo veas en la terminal
+        return jsonify({"error": "Hubo un problema al procesar la tarea"}), 500
 
 
 # ✅ Actualizar tarea

@@ -1,9 +1,14 @@
 
-const API_URL = "http://127.0.0.1:3000/api/tareas";
+const API_URL = "http://127.0.0.1:5000/api/tareas";
 
 // 1. SEGURIDAD Y DATOS DE SESIÓN
 const USUARIO_ID = localStorage.getItem('usuario_id');
 const NOMBRE_USUARIO = localStorage.getItem('nombre_usuario');
+
+// Si no hay ID de usuario, redirigir al login inmediatamente
+if (!localStorage.getItem('usuario_id')) {
+    window.location.href = 'login.html';
+}
 
 // Si el usuario no ha iniciado sesión, lo devolvemos al login inmediatamente
 if (!USUARIO_ID) {
@@ -48,9 +53,10 @@ async function cargarTareas() {
     }
 }
 
-// 4. AGREGAR NUEVA TAREA
+// 4. AGREGAR NUEVA TAREA (Corregido)
 async function agregarTarea() {
-    const titulo = document.getElementById("titulo-tarea").value;
+    const titulo = document.getElementById("titulo-tarea").value.trim();
+    const descripcion = document.getElementById("descripcion-tarea").value.trim();
     const fecha = document.getElementById("fecha-tarea").value;
 
     if (!titulo) return alert("El título es obligatorio");
@@ -58,22 +64,38 @@ async function agregarTarea() {
     const nuevaTarea = {
         usuario_id: parseInt(USUARIO_ID),
         titulo: titulo,
+        descripcion: descripcion, // Asegúrate de enviarla
         fecha_limite: fecha,
-        estado: 'pendiente' // Por defecto siempre nacen pendientes
+        estado: 'pendiente'
     };
 
+    const btn = document.querySelector(".btn-add");
+    btn.disabled = true;
+    btn.innerText = "Guardando...";
+
     try {
-        await fetch(API_URL, {
+        const respuesta = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(nuevaTarea)
         });
 
-        document.getElementById("titulo-tarea").value = ""; 
-        document.getElementById("fecha-tarea").value = ""; 
-        cargarTareas(); 
+        if (respuesta.ok) {
+            // Limpiar campos solo si tuvo éxito
+            document.getElementById("titulo-tarea").value = ""; 
+            document.getElementById("descripcion-tarea").value = "";
+            document.getElementById("fecha-tarea").value = ""; 
+            cargarTareas(); 
+        } else {
+            alert("Error en el servidor al guardar.");
+        }
     } catch (error) {
-        alert("No se pudo guardar la tarea.");
+        console.error("Error:", error);
+        alert("No se pudo conectar con el servidor.");
+    } finally {
+        // Esto se ejecuta SIEMPRE, haya error o no
+        btn.disabled = false;
+        btn.innerText = "Añadir";
     }
 }
 
@@ -95,7 +117,8 @@ async function alternarEstado(id, estadoActual) {
 
 // 6. ELIMINAR TAREA
 async function eliminarTarea(id) {
-    if (confirm("¿Eliminar esta tarea?")) {
+    const confirmar = confirm("¿Estás seguro de que quieres eliminar esta tarea?");
+    if (confirm) {
         try {
             await fetch(`${API_URL}/${id}`, { method: "DELETE" });
             cargarTareas();
