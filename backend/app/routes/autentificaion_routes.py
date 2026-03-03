@@ -19,7 +19,7 @@ def register():
     cur = conn.cursor()
     try:
         cur.execute(
-            "INSERT INTO usuarios (nombre, email, password_hash) VALUES (%s, %s, %s) RETURNING id",
+            "INSERT INTO usuarios (nombre, email, password) VALUES (%s, %s, %s) RETURNING id",
             (nombre, email, hash_pw)
         )
         usuario_id = cur.fetchone()[0]
@@ -39,7 +39,7 @@ def login():
     
     conn = obtener_conexion()
     cur = conn.cursor()
-    cur.execute("SELECT id, password_hash, nombre FROM usuarios WHERE email = %s", (email,))
+    cur.execute("SELECT id, password, nombre FROM usuarios WHERE email = %s", (email,))
     user = cur.fetchone()
     cur.close()
     conn.close()
