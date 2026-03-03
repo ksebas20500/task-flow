@@ -32,17 +32,18 @@ TaskFlow/
 │   │   └── tarea_modelo.py
 │   │
 │   └── routes/
-│       ├── tareas_routes.py
-│       └── autentificaion_routes.py
-│
+│   │    ├── tareas_routes.py
+│   │   └── autentificaion_routes.py
+│   └──run.py
 ├── frontend/
 │   ├── css/
 │   ├── js/
 │   └── pages/
 │
-├── run.py
+
 ├── requirements.txt (opcional)
 └── README.md
 ```
 ---
+
 
